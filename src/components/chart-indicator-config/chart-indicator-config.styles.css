@@ -1,0 +1,46 @@
+.indicator-configuration-form {
+	margin: 15px 0 15px 0;
+	height: 90%;
+	position: relative;
+	text-align: center;
+}
+
+.price-parameter-selector {
+	width: 150px;
+	text-align-last: center;
+}
+
+.windowSize-input {
+	width: 150px;
+	text-align: center;
+}
+
+.indicator-configuration-button-container {
+	position: absolute;
+	bottom: -25px;
+	/* right: 10px; */
+	display: flex;
+	width: 100%;
+	justify-content: space-between;
+}
+
+.indicator-configuration-submit-button,
+.indicator-configuration-delete-button {
+	cursor: pointer;
+	outline: none;
+	/* margin-top: 15px;
+	float: right; */
+}
+
+.config-parameter {
+	margin-bottom: 5px;
+	padding-bottom: 5px;
+}
+
+/* label.config-parameter-header {
+	display: inline-block;
+} */
+
+.config-parameter-header {
+	padding-bottom: 5px;
+}

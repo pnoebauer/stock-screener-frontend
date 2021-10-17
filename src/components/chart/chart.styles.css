@@ -1,0 +1,92 @@
+:not(:root):fullscreen {
+	background: white;
+	overflow: scroll !important;
+}
+
+body:fullscreen {
+	height: 100vh !important;
+}
+
+#fullscreen-button {
+	position: relative;
+	height: 30px;
+	width: 30px;
+	top: 88px;
+	right: 59px;
+	float: right;
+	z-index: 1000;
+}
+
+svg.react-stockchart {
+	left: 0;
+}
+
+.chart-settings {
+	display: flex;
+	/* justify-content: flex-start; */
+	justify-content: space-between;
+	position: relative;
+	flex-wrap: nowrap;
+	flex-shrink: 0;
+	height: 60px;
+	padding: 10px;
+	width: 98vw;
+	box-sizing: border-box;
+}
+
+.symbol-barperiod-select {
+	display: flex;
+}
+
+.chart-sizing-container {
+	display: block;
+	height: 100%;
+	box-sizing: border-box;
+}
+
+.chart-sizing-label {
+	display: block;
+	text-align: center;
+	font-size: 80%;
+}
+
+button.chart-indicator-button {
+	position: relative;
+	border: 1px solid black;
+	border-radius: 15%;
+	/* width: 30px; */
+	width: 8%;
+}
+
+.chart-indicator-icon,
+.enlarge-icon {
+	position: absolute;
+
+	left: 0;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	margin: auto;
+
+	width: 80%;
+	height: 50%;
+
+	cursor: pointer;
+}
+
+.chart-indicator-icon:hover,
+.enlarge-icon:hover {
+	transform: scale(1.1);
+}
+
+#stock-symbol,
+.interval-type-selector {
+	text-align: center;
+	box-sizing: border-box;
+	height: 100%;
+}
+
+#stock-symbol:focus,
+.interval-type-selector:focus {
+	outline: none;
+}

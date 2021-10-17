@@ -1,0 +1,9 @@
+.indexation {
+	background-color: rgba(249, 251, 251, 1);
+	height: 40px;
+	box-sizing: border-box;
+
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}

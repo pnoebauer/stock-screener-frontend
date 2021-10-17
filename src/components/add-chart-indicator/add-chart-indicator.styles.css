@@ -1,0 +1,7 @@
+/* #added-indicator {
+	margin-left: auto;
+} */
+
+.add-chart-indicators-container {
+	display: flex;
+}

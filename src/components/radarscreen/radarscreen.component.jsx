@@ -1,0 +1,226 @@
+import React from 'react';
+
+import {connect} from 'react-redux';
+
+import ScreenHeader from '../screen-header/screen-header.component';
+import GenerateGrid from '../generate-grid/generate-grid.component';
+import AddColumnButton from '../add-column-button/add-column-button.component';
+import AddRowInput from '../add-row-input/add-row-input.component';
+import AddStockUniverseButton from '../add-stock-universe-button/add-stock-universe-button.component';
+import DeleteAllRows from '../delete-all-rows/delete-all-rows.component';
+import FilterSymbolsButton from '../filter-symbols-button/filter-symbols-button.component';
+import Spinner from '../spinner/spinner.component';
+import Indexation from '../indexation/indexation.component';
+
+import {
+	getStockNumber,
+	getColumnNames,
+	getColumn,
+	getNonCustomIndicators,
+} from '../../redux/stockData/stockData.selectors';
+
+import {getFilteredStockNumber} from '../../redux/filtering/filtering.selectors';
+
+import {
+	doUpdateNonCustomIndicators,
+	doUpdateCustomIndicators,
+} from '../../redux/stockData/stockData.actions';
+
+import './radarscreen.styles.css';
+
+const permanentHeaders = ['ID', 'Symbol', 'Interval'];
+
+let updateKey = null;
+
+// utility function to calc ms from now
+// required for the setTimeout after mounting and to determine first data update
+const msDifToTimeFromNow = (hr, min) => {
+	const nowDate = new Date();
+
+	const hrMin = hr + min / 60;
+
+	const day =
+		nowDate.getHours() + nowDate.getMinutes() / 60 >= hrMin
+			? nowDate.getDate() + 1
+			: nowDate.getDate();
+
+	const eodDate = new Date(nowDate.getFullYear(), nowDate.getMonth(), day, hr, min);
+
+	const msDif = eodDate.getTime() - nowDate.getTime();
+
+	return msDif;
+};
+
+class RadarScreen extends React.PureComponent {
+	constructor(props) {
+		super(props);
+		this.events = undefined;
+	}
+
+	tick(type) {
+		// console.log(new Date().getSeconds(), 'sec', type);
+		this.props.updateCustomIndicators();
+	}
+
+	componentDidMount() {
+		const timeToEOD = msDifToTimeFromNow(16, 0);
+		// console.log(timeToEOD, 'dif');
+
+		this.timeout = setTimeout(() => {
+			this.interval = setInterval(() => this.tick('interval'), 30000);
+			this.tick('timeout');
+		}, timeToEOD);
+
+		// this.props.updateCustomIndicators();
+		this.startEventSource();
+
+		// make updateCustomIndicators async so that persist-rehydrate completes before that
+		// and the sagas get the state after rehydration
+		setTimeout(() => this.props.updateCustomIndicators(), 0);
+	}
+
+	componentDidUpdate(prevProps) {
+		let sameElements = (arr1, arr2) =>
+			[...arr1].sort().join() === [...arr2].sort().join(); //check if both arrays are equal (incl. duplicates)
+
+		const symbolsUpdate = !sameElements(prevProps.symbols, this.props.symbols);
+		const intervalsUpdate = !sameElements(prevProps.intervals, this.props.intervals);
+
+		// API sends all indicators so the shown indicators on the screen do not affect the event source
+		const apiIndicatorUpdate = !sameElements(
+			prevProps.apiIndicators,
+			this.props.apiIndicators
+		);
+
+		// if a symbol, interval or indicator has been changed, then create a new eventsource to update the data
+		if (symbolsUpdate || intervalsUpdate || apiIndicatorUpdate) {
+			// close old event source and start a new one with updated Symbol
+			if (this.events) {
+				this.events.close();
+				this.startEventSource();
+			}
+		}
+	}
+
+	startEventSource() {
+		const {updateNonCustomIndicators} = this.props;
+
+		const uniqueSymbols = [...new Set(this.props.symbols)];
+		// console.log('start new event source', uniqueSymbols);
+
+		const url = `${
+			process.env.REACT_APP_BACKEND_URL
+		}/events/symbols?id=${uniqueSymbols.join(',')}`;
+
+		this.events = new EventSource(url);
+
+		// Subscribe to all events without an explicit type
+		this.events.onmessage = event => {
+			const symbolsDataObject = JSON.parse(event.data);
+			updateNonCustomIndicators(symbolsDataObject);
+		};
+	}
+
+	componentWillUnmount() {
+		if (this.events) {
+			// console.log('unmounting, closing eventSource');
+			this.events.close();
+		}
+		clearInterval(this.interval);
+		clearTimeout(this.timeout);
+	}
+
+	render() {
+		const {columnNames, stockNumber, filteredStockNumber} = this.props;
+
+		updateKey = columnNames;
+
+		return (
+			<div className='radarscreen'>
+				<Spinner />
+
+				<div id='main-grid-and-settings-container' style={{display: 'flex'}}>
+					<div
+						id='grid-container'
+						style={{
+							gridTemplateColumns: `20px 20px repeat(${columnNames.length}, 1fr) `,
+							gridTemplateRows: `repeat(${filteredStockNumber + 1}, 1fr) 0`,
+						}}
+					>
+						<Indexation gridColumn={1} />
+
+						<AddStockUniverseButton
+							style={{
+								gridColumn: '2',
+								gridRow: '1',
+							}}
+						/>
+						<ScreenHeader columnOffset={2} />
+						<GenerateGrid columnOffset={2} />
+					</div>
+
+					<div
+						id='table-settings-grid'
+						style={{
+							display: 'grid',
+							gridTemplateColumns: `20px 20px`,
+							gridTemplateRows: `40px`,
+						}}
+					>
+						<AddColumnButton
+							style={{
+								gridColumn: `1`,
+								gridRow: '1',
+							}}
+							key={updateKey}
+						/>
+						<FilterSymbolsButton
+							style={{
+								gridColumn: `2`,
+								gridRow: '1',
+							}}
+							key={`${updateKey} filter`}
+						/>
+					</div>
+				</div>
+
+				<div
+					id='last-screen-row-grid'
+					style={{
+						gridTemplateColumns: `20px 20px repeat(${columnNames.length}, 1fr) 20px 20px`,
+						gridTemplateRows: '1fr',
+					}}
+				>
+					<AddRowInput gridRow={1} columnOffset={2} />
+					<DeleteAllRows gridRow={1} gridColumn={2} />
+					<div
+						id='number-symbols'
+						style={{
+							gridColumn: '1',
+							gridRow: '1',
+						}}
+					>
+						{stockNumber + 1}
+					</div>
+				</div>
+			</div>
+		);
+	}
+}
+
+const mapStateToProps = state => ({
+	stockNumber: getStockNumber(state),
+	filteredStockNumber: getFilteredStockNumber(state),
+	columnNames: getColumnNames(state),
+	symbols: getColumn(state, 'Symbol'),
+	intervals: getColumn(state, 'Interval'),
+	apiIndicators: getNonCustomIndicators(state),
+});
+
+const mapDispatchToProps = dispatch => ({
+	updateNonCustomIndicators: apiDataObject =>
+		dispatch(doUpdateNonCustomIndicators(apiDataObject)),
+	updateCustomIndicators: () => dispatch(doUpdateCustomIndicators()),
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(RadarScreen);
