@@ -769,13 +769,13 @@ export const CHART_INDICATORS = {
 		slow: 26,
 		signal: 9,
 	},
-	bollingerBand: {
-		windowSize: 20,
-		// source: d => d.close, // "high", "low", "open", "close"
-		sourcePath: 'close',
-		movingAverageType: 'sma',
-		multiplier: 2,
-	},
+	// bollingerband: {
+	// 	windowSize: 20,
+	// 	// source: d => d.close, // "high", "low", "open", "close"
+	// 	sourcePath: 'close',
+	// 	movingAverageType: 'sma',
+	// 	multiplier: 2,
+	// },
 	tma: {
 		sourcePath: 'close',
 		windowSize: 20,

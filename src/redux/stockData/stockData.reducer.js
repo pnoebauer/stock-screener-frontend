@@ -5,14 +5,21 @@ import {
 	INTERVALS,
 	INDICATORS_TO_API,
 	API_TO_INDICATORS,
+	DJ30,
 } from '../../assets/constants';
 
 import {StockDataTypes} from './stockData.types';
 
+// const initialState = {
+// 	Symbol: SYMBOLS.slice(0, 50),
+// 	Interval: Array(50).fill(INTERVALS[0]),
+// 	ID: [...Array(50)].map((a, idx) => idx),
+// };
+
 const initialState = {
-	Symbol: SYMBOLS.slice(0, 50),
-	Interval: Array(50).fill(INTERVALS[0]),
-	ID: [...Array(50)].map((a, idx) => idx),
+	Symbol: DJ30,
+	Interval: Array(DJ30.length).fill(INTERVALS[0]),
+	ID: [...Array(DJ30.length)].map((a, idx) => idx),
 };
 
 const stockDataReducer = (state = initialState, action) => {
@@ -64,8 +71,6 @@ const applyUpdateNonCustomIndicators = (state, action) => {
 	const symbols = state.Symbol;
 	const apiObject = action.payload;
 
-	// console.log(apiObject, 'ao');
-
 	let nextState = {...state};
 
 	const apiIndicators = Object.keys(state).flatMap(indicatorName =>
@@ -77,14 +82,11 @@ const applyUpdateNonCustomIndicators = (state, action) => {
 		// look up the name used for the column header (and state key)
 		const stateIndicatorName = API_TO_INDICATORS[apiIndicatorName];
 
-		// console.log(apiIndicatorName, 'apiIndicatorName', stateIndicatorName);
-
 		// converts api object to state array format
 		nextState = {
 			...nextState,
 			[stateIndicatorName]: symbols.map(
 				symbolName =>
-					// apiObject[symbolName][apiIndicatorName]
 					(apiObject &&
 						apiObject[symbolName] &&
 						apiObject[symbolName][apiIndicatorName]) ??
@@ -101,7 +103,7 @@ const applyAddUniverse = (state, action) => {
 	const nextState = {...state};
 
 	let maxId = Math.max(...state.ID, 0);
-	// const currentStockNumber = state.Symbol.length;
+
 	const addedStockNumber = addedStocks.length;
 
 	Object.keys(state).forEach(columnName => {

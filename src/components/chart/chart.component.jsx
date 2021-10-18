@@ -357,11 +357,10 @@ class CandleStickChartPanToLoadMore extends React.Component {
 		if (inputData.length - prevData.length < 1000) {
 			// console.log('------LOADING MORE DATA', inputData[0].date);
 			await this.props.loadData(inputData[0].date);
-
-			return;
+			// return;
 		}
 
-		// console.log('changed', indicatorConfigurations);
+		// console.log('changed configs', indicatorConfigurations);
 		if (prevProps.indicatorConfigurations !== indicatorConfigurations) {
 			// console.log('changed', indicatorConfigurations);
 
@@ -514,7 +513,6 @@ class CandleStickChartPanToLoadMore extends React.Component {
 					xAccessor={xAccessor}
 					displayXAccessor={displayXAccessor}
 					onLoadMore={this.handleDownloadMore}
-
 					seriesName={`${stockSymbol}_${this.state.suffix}`}
 					mouseMoveEvent={mouseMoveEvent}
 					panEvent={panEvent}
@@ -725,7 +723,5 @@ CandleStickChartPanToLoadMore = fitWidth(CandleStickChartPanToLoadMore);
 const mapStateToProps = state => ({
 	indicatorConfigurations: getChartIndicatorConfigs(state),
 });
-
-// export default CandleStickChartPanToLoadMore;
 
 export default connect(mapStateToProps)(CandleStickChartPanToLoadMore);

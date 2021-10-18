@@ -19,6 +19,9 @@ import {SYMBOLS, INTERVALS} from '../../assets/constants';
 
 import './chart.styles.css';
 
+const DEFAULT_MAIN_CHART_HEIGHT = 400;
+const DEFAULT_SUB_CHART_HEIGHT = 100;
+
 class ChartComponent extends React.Component {
 	constructor(props) {
 		super(props);
@@ -34,9 +37,10 @@ class ChartComponent extends React.Component {
 			shownValue: '',
 			fetchedEndDate: undefined,
 			width: window.innerWidth,
-			mainChartHeight: 300,
-			subChartHeight: 100,
+			mainChartHeight: DEFAULT_MAIN_CHART_HEIGHT,
+			subChartHeight: DEFAULT_SUB_CHART_HEIGHT,
 			isFullScreen: false,
+			loading: true,
 		};
 	}
 
@@ -71,7 +75,8 @@ class ChartComponent extends React.Component {
 			prevState.symbol !== this.state.symbol ||
 			prevState.samplePeriod !== this.state.samplePeriod
 		) {
-			this.setState({data: []});
+			this.setState({data: [], loading: true});
+			// this.setState({loading: true});
 
 			sessionStorage.setItem('shownChartSymbol', this.state.symbol);
 			sessionStorage.setItem('activeChartPeriod', this.state.samplePeriod);
@@ -113,18 +118,17 @@ class ChartComponent extends React.Component {
 
 			// console.log('newData', newData);
 
-			this.setState(
-				{
-					data: [
-						...newData.map(candle => ({...candle, date: new Date(candle.date)})),
-						...this.state.data,
-					],
-				}
-				// () =>
-				// console.log({data: this.state.data, fetchedEndDate: this.state.fetchedEndDate})
-			);
+			this.setState({
+				data: [
+					...newData.map(candle => ({...candle, date: new Date(candle.date)})),
+					...this.state.data,
+				],
+				loading: false,
+			});
 		} catch (error) {
 			console.log({error});
+
+			this.setState({loading: 'error'});
 		}
 	};
 
@@ -152,7 +156,6 @@ class ChartComponent extends React.Component {
 
 	handleBlur = e => {
 		e.preventDefault();
-
 		// console.log('blur', this.state.shownValue);
 
 		if (SYMBOLS.includes(this.state.shownValue)) {
@@ -172,97 +175,103 @@ class ChartComponent extends React.Component {
 	};
 
 	render() {
-		if (this.state.data.length === 0) {
-			return <div>Loading...</div>;
+		// if (this.state.data.length === 0) {
+		// return <div>Loading...</div>;
+
+		if (this.state.loading === true) {
+			return (
+				<div style={{position: 'relative', height: '100%', width: '100%'}}>
+					<div id='chart-loader'></div>
+				</div>
+			);
+		} else if (this.state.loading === 'error') {
+			return <div>Unable to load data</div>;
 		}
 		return (
-			<>
-				<FullScreen
-					isFullScreen={this.state.isFullScreen}
-					onChange={isFullScreen => {
-						this.setState({isFullScreen});
-					}}
+			<FullScreen
+				isFullScreen={this.state.isFullScreen}
+				onChange={isFullScreen => {
+					this.setState({isFullScreen});
+				}}
+			>
+				<button
+					onClick={e =>
+						this.setState(prevState => ({
+							isFullScreen: !prevState.isFullScreen,
+						}))
+					}
+					id='fullscreen-button'
 				>
-					<button
-						onClick={e =>
-							this.setState(prevState => ({
-								isFullScreen: !prevState.isFullScreen,
-							}))
-						}
-						id='fullscreen-button'
-					>
-						{this.state.isFullScreen ? (
-							<ImShrink2 className='enlarge-icon' />
-						) : (
-							<ImEnlarge2 className='enlarge-icon' />
-						)}
-					</button>
-					<div className='chart-settings'>
-						<div className='symbol-barperiod-select'>
-							<input
-								list='symbols'
-								name='stock-symbol'
-								id='stock-symbol'
-								onChange={this.onChange}
-								placeholder={this.state.symbol}
-								onKeyUp={this.onKeyUp}
-								onBlur={this.handleBlur}
-							/>
-							<datalist id='symbols'>
-								{SYMBOLS.map(stockName => (
-									<option key={stockName} value={stockName}>
-										{stockName}
-									</option>
-								))}
-							</datalist>
+					{this.state.isFullScreen ? (
+						<ImShrink2 className='enlarge-icon' />
+					) : (
+						<ImEnlarge2 className='enlarge-icon' />
+					)}
+				</button>
+				<div className='chart-settings'>
+					<div className='symbol-barperiod-select'>
+						<input
+							list='symbols'
+							name='stock-symbol'
+							id='stock-symbol'
+							onChange={this.onChange}
+							placeholder={this.state.symbol}
+							onKeyUp={this.onKeyUp}
+							onBlur={this.handleBlur}
+						/>
+						<datalist id='symbols'>
+							{SYMBOLS.map(stockName => (
+								<option key={stockName} value={stockName}>
+									{stockName}
+								</option>
+							))}
+						</datalist>
 
-							<select
-								value={this.state.samplePeriod}
-								onChange={this.selectionChange}
-								name='selector'
-								className='interval-type-selector'
-							>
-								{INTERVALS.map((value, index) => (
-									// console.log( value, 'v') ||
-									<option value={value} key={index}>
-										{value}
-									</option>
-								))}
-							</select>
-							<EditChartIndicatorsButton />
-						</div>
-
-						<div className='chart-sizing-container'>
-							<label className='chart-sizing-label'>Chart Heights</label>
-							<SpinButton
-								defaultValue={300}
-								handleChange={this.setHeight}
-								name={'mainChartHeight'}
-								chartName={'main'}
-							/>
-							<SpinButton
-								defaultValue={100}
-								handleChange={this.setHeight}
-								name={'subChartHeight'}
-								chartName={'sub'}
-							/>
-						</div>
-
-						<AddChartIndicator key={this.props.indicatorConfigurations.length} />
+						<select
+							value={this.state.samplePeriod}
+							onChange={this.selectionChange}
+							name='selector'
+							className='interval-type-selector'
+						>
+							{INTERVALS.map((value, index) => (
+								<option value={value} key={index}>
+									{value}
+								</option>
+							))}
+						</select>
+						<EditChartIndicatorsButton />
 					</div>
 
-					<Chart
-						type={'svg'}
-						data={this.state.data}
-						stockSymbol={this.state.symbol}
-						width={this.state.width * 1}
-						mainChartHeight={this.state.mainChartHeight}
-						subChartHeight={this.state.subChartHeight}
-						loadData={this.loadData}
-						key={this.state.symbol} //not needed (seriesname triggers the update), except for data loading
-					/>
-				</FullScreen>
-			</>
+					<div className='chart-sizing-container'>
+						<label className='chart-sizing-label'>Chart Heights</label>
+						<SpinButton
+							defaultValue={DEFAULT_MAIN_CHART_HEIGHT}
+							handleChange={this.setHeight}
+							name={'mainChartHeight'}
+							chartName={'main'}
+						/>
+						<SpinButton
+							defaultValue={DEFAULT_SUB_CHART_HEIGHT}
+							handleChange={this.setHeight}
+							name={'subChartHeight'}
+							chartName={'sub'}
+						/>
+					</div>
+
+					<AddChartIndicator key={this.props.indicatorConfigurations.length} />
+				</div>
+
+				<Chart
+					type={'svg'}
+					data={this.state.data}
+					stockSymbol={this.state.symbol}
+					width={this.state.width * 1}
+					mainChartHeight={this.state.mainChartHeight}
+					subChartHeight={this.state.subChartHeight}
+					loadData={this.loadData}
+					key={this.state.symbol} //not needed (seriesname triggers the update), except for data loading
+				/>
+			</FullScreen>
 		);
 	}
 }
