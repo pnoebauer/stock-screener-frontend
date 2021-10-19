@@ -112,6 +112,8 @@ class RadarScreen extends React.PureComponent {
 			process.env.REACT_APP_BACKEND_URL
 		}/events/symbols?id=${uniqueSymbols.join(',')}`;
 
+		// console.log('start event ', url);
+
 		this.events = new EventSource(url);
 
 		// Subscribe to all events without an explicit type

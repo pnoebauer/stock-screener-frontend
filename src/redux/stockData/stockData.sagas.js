@@ -19,7 +19,7 @@ import {
 } from '../fetching/fetching.actions';
 
 export function* fetchCustomIndicators(requestObj, rowIndex) {
-	// console.log(requestObj, 'requestObj fetchCustom');
+	// console.log({requestObj, rowIndex}, 'requestObj fetchCustom');
 	try {
 		const response = yield fetch(`${process.env.REACT_APP_BACKEND_URL}/prices/scanner`, {
 			method: 'POST', // *GET, POST, PUT, DELETE, etc.

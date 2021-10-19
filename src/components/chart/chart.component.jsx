@@ -216,6 +216,7 @@ class CandleStickChartPanToLoadMore extends React.Component {
 		// );
 
 		if (inputData.length === prevData.length) {
+			// console.log('loading more');
 			// await this.props.loadData(inputData[0].date);
 			return;
 		}
@@ -341,12 +342,9 @@ class CandleStickChartPanToLoadMore extends React.Component {
 		this.node.resetYDomain();
 	}
 	handleReset() {
-		this.setState(
-			{
-				suffix: this.state.suffix + 1,
-			},
-			() => console.log(this.state.suffix, 'suf')
-		);
+		this.setState({
+			suffix: this.state.suffix + 1,
+		});
 	}
 
 	async componentDidUpdate(prevProps, prevState) {
@@ -355,9 +353,13 @@ class CandleStickChartPanToLoadMore extends React.Component {
 		const {data: prevData, indicators} = this.state;
 
 		if (inputData.length - prevData.length < 1000) {
-			// console.log('------LOADING MORE DATA', inputData[0].date);
+			// console.log(
+			// 	'------LOADING MORE DATA',
+			// 	inputData[0].date,
+			// 	inputData.length,
+			// 	prevData.length
+			// );
 			await this.props.loadData(inputData[0].date);
-			// return;
 		}
 
 		// console.log('changed configs', indicatorConfigurations);

@@ -56,11 +56,11 @@ class ChartComponent extends React.Component {
 	};
 
 	async componentDidMount() {
-		// console.log('mounting');
 		// getData().then(data => {
 		// 	console.log({data});
 		// 	this.setState({data});
 		// });
+		// console.log('mounting loading');
 		await this.loadData(new Date());
 
 		window.visualViewport.addEventListener('resize', this.setWidth);
@@ -81,6 +81,7 @@ class ChartComponent extends React.Component {
 			sessionStorage.setItem('shownChartSymbol', this.state.symbol);
 			sessionStorage.setItem('activeChartPeriod', this.state.samplePeriod);
 
+			// console.log('update loading');
 			await this.loadData(new Date());
 		}
 	}
@@ -91,21 +92,26 @@ class ChartComponent extends React.Component {
 
 		// console.log('--------------endDate === fetchedEndDate', endDate, fetchedEndDate);
 
-		if (endDate === fetchedEndDate) {
-			// console.log('already loaded', endDate);
-			return;
+		if (endDate instanceof Date && fetchedEndDate instanceof Date) {
+			if (endDate.toDateString() === fetchedEndDate.toDateString()) {
+				// console.log('already loaded', endDate);
+				return;
+			}
 		}
+
+		// console.log('not loaded', endDate);
 
 		this.setState({fetchedEndDate: endDate});
 
 		const requestObj = {
 			symbol,
-			lookBack: 5000,
+			lookBack: 1000,
 			samplePeriod,
 			endDate,
 		};
 
 		try {
+			// console.log('fetching');
 			const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/chart`, {
 				method: 'POST', // *GET, POST, PUT, DELETE, etc.
 				headers: {
