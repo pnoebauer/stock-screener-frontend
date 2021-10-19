@@ -1,0 +1,272 @@
+diff --git a/node_modules/react-stockcharts/es/lib/ChartCanvas.js b/node_modules/react-stockcharts/es/lib/ChartCanvas.js
+index 2657363..687202e 100644
+--- a/node_modules/react-stockcharts/es/lib/ChartCanvas.js
++++ b/node_modules/react-stockcharts/es/lib/ChartCanvas.js
+@@ -1195,6 +1195,7 @@ var ChartCanvas = function (_Component) {
+ 			return React.createElement(
+ 				"div",
+ 				{ style: { position: "relative", width: width, height: height }, className: className, onClick: onSelect },
++				// { style: { width: width, height: height }, className: className, onClick: onSelect },
+ 				React.createElement(CanvasContainer, { ref: this.saveCanvasContainerNode,
+ 					type: type,
+ 					ratio: ratio,
+@@ -1202,6 +1203,7 @@ var ChartCanvas = function (_Component) {
+ 				React.createElement(
+ 					"svg",
+ 					{ className: className, width: width, height: height, style: { position: "absolute", zIndex: zIndex + 5 } },
++					// { className: className, width: width, height: height, style: { zIndex: zIndex + 5 } },
+ 					cursor,
+ 					React.createElement(
+ 						"defs",
+diff --git a/node_modules/react-stockcharts/lib/.DS_Store b/node_modules/react-stockcharts/lib/.DS_Store
+new file mode 100644
+index 0000000..9860996
+Binary files /dev/null and b/node_modules/react-stockcharts/lib/.DS_Store differ
+diff --git a/node_modules/react-stockcharts/lib/ChartCanvas.js b/node_modules/react-stockcharts/lib/ChartCanvas.js
+index 72ecd51..149bbe7 100644
+--- a/node_modules/react-stockcharts/lib/ChartCanvas.js
++++ b/node_modules/react-stockcharts/lib/ChartCanvas.js
+@@ -1218,6 +1218,7 @@ var ChartCanvas = function (_Component) {
+ 			return _react2.default.createElement(
+ 				"div",
+ 				{ style: { position: "relative", width: width, height: height }, className: className, onClick: onSelect },
++				// { style: { width: width, height: height }, className: className, onClick: onSelect },
+ 				_react2.default.createElement(_CanvasContainer2.default, { ref: this.saveCanvasContainerNode,
+ 					type: type,
+ 					ratio: ratio,
+@@ -1225,6 +1226,7 @@ var ChartCanvas = function (_Component) {
+ 				_react2.default.createElement(
+ 					"svg",
+ 					{ className: className, width: width, height: height, style: { position: "absolute", zIndex: zIndex + 5 } },
++					// { className: className, width: width, height: height },
+ 					cursor,
+ 					_react2.default.createElement(
+ 						"defs",
+diff --git a/node_modules/react-stockcharts/lib/calculator/defaultOptionsForComputation.js b/node_modules/react-stockcharts/lib/calculator/defaultOptionsForComputation.js
+index 7bb0429..4b1a859 100644
+--- a/node_modules/react-stockcharts/lib/calculator/defaultOptionsForComputation.js
++++ b/node_modules/react-stockcharts/lib/calculator/defaultOptionsForComputation.js
+@@ -5,10 +5,11 @@ Object.defineProperty(exports, "__esModule", {
+ });
+ var BollingerBand = exports.BollingerBand = {
+ 	windowSize: 20,
++	movingAverageType: "sma",
+ 	// source: d => d.close, // "high", "low", "open", "close"
+ 	sourcePath: "close",
+ 	multiplier: 2,
+-	movingAverageType: "sma"
++	
+ };
+ 
+ var ATR = exports.ATR = {
+@@ -82,6 +83,12 @@ var SMA = exports.SMA = {
+ 	windowSize: 10
+ };
+ 
++var MOM = exports.MOM = {
++	// source: d => d.close, // "high", "low", "open", "close"
++	sourcePath: "close",
++	windowSize: 10
++};
++
+ var WMA = exports.WMA = {
+ 	// source: d => d.close, // "high", "low", "open", "close"
+ 	sourcePath: "close",
+diff --git a/node_modules/react-stockcharts/lib/calculator/index.js b/node_modules/react-stockcharts/lib/calculator/index.js
+index e179edc..a63d9d5 100644
+--- a/node_modules/react-stockcharts/lib/calculator/index.js
++++ b/node_modules/react-stockcharts/lib/calculator/index.js
+@@ -22,6 +22,15 @@ Object.defineProperty(exports, "sma", {
+   }
+ });
+ 
++var _mom = require("./mom");
++
++Object.defineProperty(exports, "mom", {
++  enumerable: true,
++  get: function get() {
++    return _interopRequireDefault(_mom).default;
++  }
++});
++
+ var _wma = require("./wma");
+ 
+ Object.defineProperty(exports, "wma", {
+diff --git a/node_modules/react-stockcharts/lib/calculator/mom.js b/node_modules/react-stockcharts/lib/calculator/mom.js
+new file mode 100644
+index 0000000..22dceee
+--- /dev/null
++++ b/node_modules/react-stockcharts/lib/calculator/mom.js
+@@ -0,0 +1,48 @@
++"use strict";
++
++Object.defineProperty(exports, "__esModule", {
++	value: true
++});
++
++var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
++
++exports.default = function () {
++
++	var options = _defaultOptionsForComputation.SMA;
++
++	function calculator(data) {
++		var _options = options,
++		    windowSize = _options.windowSize,
++		    sourcePath = _options.sourcePath;
++
++		var momentum = (0, _utils.slidingWindow)().windowSize(windowSize).sourcePath(sourcePath).accumulator(function (values) {
++			// console.log({values})
++			return 100*(values[values.length-1]-values[0])/values[values.length-1];
++			// return (0, _d3Array.mean)(values);
++		});
++
++		return momentum(data);
++	}
++	calculator.undefinedLength = function () {
++		var _options2 = options,
++		    windowSize = _options2.windowSize;
++
++		return windowSize - 1;
++	};
++	calculator.options = function (x) {
++		if (!arguments.length) {
++			return options;
++		}
++		options = _extends({}, _defaultOptionsForComputation.SMA, x);
++		return calculator;
++	};
++
++	return calculator;
++};
++
++var _d3Array = require("d3-array");
++
++var _utils = require("react-stockcharts/lib/utils");
++
++var _defaultOptionsForComputation = require("react-stockcharts/lib/calculator/defaultOptionsForComputation");
++//# sourceMappingURL=mom.js.map
+\ No newline at end of file
+diff --git a/node_modules/react-stockcharts/lib/calculator/sma.js b/node_modules/react-stockcharts/lib/calculator/sma.js
+index 66110dc..853fae5 100644
+--- a/node_modules/react-stockcharts/lib/calculator/sma.js
++++ b/node_modules/react-stockcharts/lib/calculator/sma.js
+@@ -15,7 +15,6 @@ exports.default = function () {
+ 		    windowSize = _options.windowSize,
+ 		    sourcePath = _options.sourcePath;
+ 
+-
+ 		var average = (0, _utils.slidingWindow)().windowSize(windowSize).sourcePath(sourcePath).accumulator(function (values) {
+ 			return (0, _d3Array.mean)(values);
+ 		});
+diff --git a/node_modules/react-stockcharts/lib/indicator/index.js b/node_modules/react-stockcharts/lib/indicator/index.js
+index 9c62705..340fc20 100644
+--- a/node_modules/react-stockcharts/lib/indicator/index.js
++++ b/node_modules/react-stockcharts/lib/indicator/index.js
+@@ -3,7 +3,7 @@
+ Object.defineProperty(exports, "__esModule", {
+ 	value: true
+ });
+-exports.defaultOptionsForAppearance = exports.defaultOptionsForComputation = exports.compare = exports.elderImpulse = exports.change = exports.elderRay = exports.sar = exports.forceIndex = exports.stochasticOscillator = exports.atr = exports.rsi = exports.macd = exports.renko = exports.pointAndFigure = exports.kagi = exports.heikinAshi = exports.bollingerBand = exports.tma = exports.wma = exports.sma = exports.ema = undefined;
++exports.defaultOptionsForAppearance = exports.defaultOptionsForComputation = exports.compare = exports.elderImpulse = exports.change = exports.elderRay = exports.sar = exports.forceIndex = exports.stochasticOscillator = exports.atr = exports.rsi = exports.macd = exports.renko = exports.pointAndFigure = exports.kagi = exports.heikinAshi = exports.bollingerBand = exports.tma = exports.wma = exports.sma = exports.ema= exports.mom = undefined;
+ 
+ var _ema = require("./ema");
+ 
+@@ -22,6 +22,14 @@ Object.defineProperty(exports, "sma", {
+ 		return _interopRequireDefault(_sma).default;
+ 	}
+ });
++var _mom = require("./mom");
++
++Object.defineProperty(exports, "mom", {
++	enumerable: true,
++	get: function get() {
++		return _interopRequireDefault(_mom).default;
++	}
++});
+ 
+ var _wma = require("./wma");
+ 
+diff --git a/node_modules/react-stockcharts/lib/indicator/mom.js b/node_modules/react-stockcharts/lib/indicator/mom.js
+new file mode 100644
+index 0000000..38ef313
+--- /dev/null
++++ b/node_modules/react-stockcharts/lib/indicator/mom.js
+@@ -0,0 +1,49 @@
++"use strict";
++
++Object.defineProperty(exports, "__esModule", {
++	value: true
++});
++
++exports.default = function () {
++
++	var base = (0, _baseIndicator2.default)().type(ALGORITHM_TYPE).accessor(function (d) {
++		return d.mom;
++	});
++
++	var underlyingAlgorithm = (0, _calculator.mom)();
++
++	var mergedAlgorithm = (0, _utils.merge)().algorithm(underlyingAlgorithm).merge(function (datum, indicator) {
++		datum.mom = indicator;
++	});
++
++	var indicator = function indicator(data) {
++		// console.log('!!!!!!!!!!----------')
++		
++		var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : { merge: true };
++
++		if (options.merge) {
++			if (!base.accessor()) throw new Error("Set an accessor to " + ALGORITHM_TYPE + " before calculating");
++			return mergedAlgorithm(data);
++		}
++		return underlyingAlgorithm(data);
++	};
++	(0, _utils.rebind)(indicator, base, "id", "accessor", "stroke", "fill", "echo", "type");
++	(0, _utils.rebind)(indicator, underlyingAlgorithm, "undefinedLength");
++	(0, _utils.rebind)(indicator, underlyingAlgorithm, "options");
++	(0, _utils.rebind)(indicator, mergedAlgorithm, "merge", "skipUndefined");
++
++	return indicator;
++};
++
++var _utils = require("react-stockcharts/lib/utils");
++
++var _calculator = require("react-stockcharts/lib/calculator");
++
++var _baseIndicator = require("react-stockcharts/lib/indicator/baseIndicator");
++
++var _baseIndicator2 = _interopRequireDefault(_baseIndicator);
++
++function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
++
++var ALGORITHM_TYPE = "MOM";
++//# sourceMappingURL=mom.js.map
+\ No newline at end of file
+diff --git a/node_modules/react-stockcharts/lib/indicator/sma.js b/node_modules/react-stockcharts/lib/indicator/sma.js
+index 6304430..d326bb7 100644
+--- a/node_modules/react-stockcharts/lib/indicator/sma.js
++++ b/node_modules/react-stockcharts/lib/indicator/sma.js
+@@ -17,6 +17,8 @@ exports.default = function () {
+ 	});
+ 
+ 	var indicator = function indicator(data) {
++		// console.log('!!!!!!!!!!----------')
++		
+ 		var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : { merge: true };
+ 
+ 		if (options.merge) {
+diff --git a/node_modules/react-stockcharts/lib/tooltip/OHLCTooltip.js b/node_modules/react-stockcharts/lib/tooltip/OHLCTooltip.js
+index 84c5b36..8bac4ba 100644
+--- a/node_modules/react-stockcharts/lib/tooltip/OHLCTooltip.js
++++ b/node_modules/react-stockcharts/lib/tooltip/OHLCTooltip.js
+@@ -159,7 +159,8 @@ var displayTextsDefault = {
+ 	l: " L: ",
+ 	c: " C: ",
+ 	v: " Vol: ",
+-	na: "n/a"
++	na: "n/a",
++	
+ };
+ 
+ OHLCTooltip.defaultProps = {
