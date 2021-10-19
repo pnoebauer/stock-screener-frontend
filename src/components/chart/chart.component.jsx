@@ -352,15 +352,15 @@ class CandleStickChartPanToLoadMore extends React.Component {
 
 		const {data: prevData, indicators} = this.state;
 
-		if (inputData.length - prevData.length < 1000) {
-			// console.log(
-			// 	'------LOADING MORE DATA',
-			// 	inputData[0].date,
-			// 	inputData.length,
-			// 	prevData.length
-			// );
-			await this.props.loadData(inputData[0].date);
-		}
+		// if (inputData.length - prevData.length < 1000) {
+		// 	// console.log(
+		// 	// 	'------LOADING MORE DATA',
+		// 	// 	inputData[0].date,
+		// 	// 	inputData.length,
+		// 	// 	prevData.length
+		// 	// );
+		// 	await this.props.loadData(inputData[0].date);
+		// }
 
 		// console.log('changed configs', indicatorConfigurations);
 		if (prevProps.indicatorConfigurations !== indicatorConfigurations) {

@@ -105,7 +105,7 @@ class ChartComponent extends React.Component {
 
 		const requestObj = {
 			symbol,
-			lookBack: 1000,
+			lookBack: 5000,
 			samplePeriod,
 			endDate,
 		};
