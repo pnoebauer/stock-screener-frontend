@@ -362,9 +362,9 @@ class CandleStickChartPanToLoadMore extends React.Component {
 		// 	await this.props.loadData(inputData[0].date);
 		// }
 
-		// console.log('changed configs', indicatorConfigurations);
+		console.log('changed configs', indicatorConfigurations);
 		if (prevProps.indicatorConfigurations !== indicatorConfigurations) {
-			// console.log('changed', indicatorConfigurations);
+			console.log('changed', indicatorConfigurations);
 
 			const indicators = indicatorConfigurations.map((indicator, index) => {
 				if (prevProps.indicatorConfigurations[index] !== indicator) {
