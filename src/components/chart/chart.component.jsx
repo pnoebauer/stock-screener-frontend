@@ -69,7 +69,7 @@ const pipe =
 	x =>
 		fns.reduce((v, f) => f(v), x);
 
-const LENGTH_TO_SHOW = 880;
+const LENGTH_TO_SHOW = 1880;
 
 const macdAppearance = {
 	stroke: {
@@ -182,7 +182,7 @@ class CandleStickChartPanToLoadMore extends React.Component {
 			inactive: false,
 			startPoint,
 			start: 0,
-			// suffix: 1,
+			suffix: 1,
 		};
 
 		// console.log('s', this.state);
@@ -202,7 +202,7 @@ class CandleStickChartPanToLoadMore extends React.Component {
 		const {data: inputData} = this.props;
 
 		// if (inputData.length - prevData.length < 800) {
-		// 	console.log('------LOADING MORE DATA', inputData[0].date);
+		// 	// console.log('------LOADING MORE DATA', inputData[0].date);
 		// 	await this.props.loadData(inputData[0].date);
 		// }
 
@@ -217,7 +217,7 @@ class CandleStickChartPanToLoadMore extends React.Component {
 
 		if (inputData.length === prevData.length) {
 			// console.log('loading more');
-			// await this.props.loadData(inputData[0].date);
+			await this.props.loadData(inputData[0].date);
 			return;
 		}
 
@@ -377,6 +377,8 @@ class CandleStickChartPanToLoadMore extends React.Component {
 					// 	optionsConfig,
 					// });
 
+					console.log({type});
+
 					return (
 						indicatorFunctions[type]()
 							.id(id)
@@ -490,7 +492,7 @@ class CandleStickChartPanToLoadMore extends React.Component {
 			MAIN_CHART_INDICATORS.includes(indicator.type().toLowerCase()) ? [] : [indicator]
 		);
 
-		// console.log({data, displayXAccessor, xAccessor, xScale});
+		// console.log({data, inputData, displayXAccessor, xAccessor, xScale});
 
 		const canvasHeight =
 			canvasMargin.top +

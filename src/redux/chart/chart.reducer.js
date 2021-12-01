@@ -5,23 +5,29 @@ import {ConfigurationTypes} from './chart.types';
 const initialState = {
 	indicators: [
 		{
-			type: 'ema',
-			windowSize: 30,
-			sourcePath: 'high',
+			type: 'sma',
+			windowSize: 200,
+			sourcePath: 'close',
 			id: 0,
 		},
 		{
-			type: 'sma',
-			windowSize: 5,
+			type: 'mom',
+			windowSize: 90,
 			sourcePath: 'close',
 			id: 1,
 		},
-		{
-			type: 'sma',
-			windowSize: 15,
-			sourcePath: 'close',
-			id: 2,
-		},
+		// {
+		// 	type: 'ema',
+		// 	windowSize: 5,
+		// 	sourcePath: 'close',
+		// 	id: 1,
+		// },
+		// {
+		// 	type: 'sma',
+		// 	windowSize: 15,
+		// 	sourcePath: 'close',
+		// 	id: 2,
+		// },
 	],
 };
 

@@ -68,6 +68,8 @@ class ChartComponent extends React.Component {
 
 	componentWillUnmount() {
 		window.visualViewport.removeEventListener('resize', this.setWidth);
+
+		this.setState({data: []});
 	}
 
 	async componentDidUpdate(prevProps, prevState) {
@@ -82,20 +84,22 @@ class ChartComponent extends React.Component {
 			sessionStorage.setItem('activeChartPeriod', this.state.samplePeriod);
 
 			// console.log('update loading');
-			await this.loadData(new Date());
+			await this.loadData(new Date(), true);
 		}
 	}
 
-	loadData = async endDate => {
+	loadData = async (endDate, symbolChange) => {
 		// console.log('loading', {endDate, data: this.state.data});
 		const {symbol, samplePeriod, fetchedEndDate} = this.state;
 
 		// console.log('--------------endDate === fetchedEndDate', endDate, fetchedEndDate);
 
-		if (endDate instanceof Date && fetchedEndDate instanceof Date) {
-			if (endDate.toDateString() === fetchedEndDate.toDateString()) {
-				// console.log('already loaded', endDate);
-				return;
+		if (!symbolChange) {
+			if (endDate instanceof Date && fetchedEndDate instanceof Date) {
+				if (endDate.toDateString() === fetchedEndDate.toDateString()) {
+					// console.log('already loaded', endDate);
+					return;
+				}
 			}
 		}
 
@@ -105,7 +109,7 @@ class ChartComponent extends React.Component {
 
 		const requestObj = {
 			symbol,
-			lookBack: 5000,
+			lookBack: 35000,
 			samplePeriod,
 			endDate,
 		};
